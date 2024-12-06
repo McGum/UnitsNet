@@ -1,7 +1,7 @@
 {
   "Name": "MassConcentration",
   "BaseUnit": "KilogramPerCubicMeter",
-  "XmlDoc": "In chemistry, the mass concentration ρi (or γi) is defined as the mass of a constituent mi divided by the volume of the mixture V",
+  "XmlDocSummary": "In chemistry, the mass concentration ρi (or γi) is defined as the mass of a constituent mi divided by the volume of the mixture V",
   "XmlDocRemarks": "https://en.wikipedia.org/wiki/Mass_concentration_(chemistry)",
   "BaseDimensions": {
     "M": 1,
@@ -15,8 +15,8 @@
         "M": "Gram",
         "L": "Millimeter"
       },
-      "FromUnitToBaseFunc": "x/1e-6",
-      "FromBaseToUnitFunc": "x*1e-6",
+      "FromUnitToBaseFunc": "{x} / 1e-6",
+      "FromBaseToUnitFunc": "{x} * 1e-6",
       "Prefixes": [ "Kilo" ],
       "Localization": [
         {
@@ -32,8 +32,8 @@
         "M": "Gram",
         "L": "Centimeter"
       },
-      "FromUnitToBaseFunc": "x/1e-3",
-      "FromBaseToUnitFunc": "x*1e-3",
+      "FromUnitToBaseFunc": "{x} / 1e-3",
+      "FromBaseToUnitFunc": "{x} * 1e-3",
       "Prefixes": [ "Kilo" ],
       "Localization": [
         {
@@ -49,8 +49,8 @@
         "M": "Gram",
         "L": "Meter"
       },
-      "FromUnitToBaseFunc": "x/1e3",
-      "FromBaseToUnitFunc": "x*1e3",
+      "FromUnitToBaseFunc": "{x} / 1e3",
+      "FromBaseToUnitFunc": "{x} * 1e3",
       "Prefixes": [ "Kilo", "Milli", "Micro" ],
       "Localization": [
         {
@@ -64,14 +64,31 @@
       ]
     },
     {
+      "SingularName": "GramPerMicroliter",
+      "PluralName": "GramsPerMicroliter",
+      "BaseUnits": {
+        "M": "Gram",
+        "L": "Centimeter"
+      },
+      "FromUnitToBaseFunc": "{x} / 1e-6",
+      "FromBaseToUnitFunc": "{x} * 1e-6",
+      "Prefixes": [ "Pico", "Nano", "Micro", "Milli", "Centi", "Deci" ],
+      "Localization": [
+        {
+          "Culture": "en-US",
+          "Abbreviations": [ "g/μL" ]
+        }
+      ]
+    },
+    {
       "SingularName": "GramPerMilliliter",
       "PluralName": "GramsPerMilliliter",
       "BaseUnits": {
         "M": "Gram",
         "L": "Centimeter"
       },
-      "FromUnitToBaseFunc": "x/1e-3",
-      "FromBaseToUnitFunc": "x*1e-3",
+      "FromUnitToBaseFunc": "{x} / 1e-3",
+      "FromBaseToUnitFunc": "{x} * 1e-3",
       "Prefixes": [ "Pico", "Nano", "Micro", "Milli", "Centi", "Deci" ],
       "Localization": [
         {
@@ -83,8 +100,8 @@
     {
       "SingularName": "GramPerDeciliter",
       "PluralName": "GramsPerDeciliter",
-      "FromUnitToBaseFunc": "x/1e-1",
-      "FromBaseToUnitFunc": "x*1e-1",
+      "FromUnitToBaseFunc": "{x} / 1e-1",
+      "FromBaseToUnitFunc": "{x} * 1e-1",
       "Prefixes": [ "Pico", "Nano", "Micro", "Milli", "Centi", "Deci" ],
       "Localization": [
         {
@@ -100,8 +117,8 @@
         "M": "Gram",
         "L": "Decimeter"
       },
-      "FromUnitToBaseFunc": "x",
-      "FromBaseToUnitFunc": "x",
+      "FromUnitToBaseFunc": "{x}",
+      "FromBaseToUnitFunc": "{x}",
       "Prefixes": [ "Pico", "Nano", "Micro", "Milli", "Centi", "Deci", "Kilo" ],
       "Localization": [
         {
@@ -117,8 +134,8 @@
         "M": "Tonne",
         "L": "Millimeter"
       },
-      "FromUnitToBaseFunc": "x/1e-12",
-      "FromBaseToUnitFunc": "x*1e-12",
+      "FromUnitToBaseFunc": "{x} / 1e-12",
+      "FromBaseToUnitFunc": "{x} * 1e-12",
       "Localization": [
         {
           "Culture": "en-US",
@@ -133,8 +150,8 @@
         "M": "Tonne",
         "L": "Centimeter"
       },
-      "FromUnitToBaseFunc": "x/1e-9",
-      "FromBaseToUnitFunc": "x*1e-9",
+      "FromUnitToBaseFunc": "{x} / 1e-9",
+      "FromBaseToUnitFunc": "{x} * 1e-9",
       "Localization": [
         {
           "Culture": "en-US",
@@ -149,8 +166,8 @@
         "M": "Tonne",
         "L": "Meter"
       },
-      "FromUnitToBaseFunc": "x/0.001",
-      "FromBaseToUnitFunc": "x*0.001",
+      "FromUnitToBaseFunc": "{x} / 0.001",
+      "FromBaseToUnitFunc": "{x} * 0.001",
       "Localization": [
         {
           "Culture": "en-US",
@@ -165,8 +182,8 @@
         "M": "Pound",
         "L": "Inch"
       },
-      "FromUnitToBaseFunc": "x/3.6127298147753e-5",
-      "FromBaseToUnitFunc": "x*3.6127298147753e-5",
+      "FromUnitToBaseFunc": "{x} / 3.6127298147753e-5",
+      "FromBaseToUnitFunc": "{x} * 3.6127298147753e-5",
       "Prefixes": [ "Kilo" ],
       "Localization": [
         {
@@ -183,8 +200,8 @@
         "M": "Pound",
         "L": "Foot"
       },
-      "FromUnitToBaseFunc": "x/0.062427961",
-      "FromBaseToUnitFunc": "x*0.062427961",
+      "FromUnitToBaseFunc": "{x} / 0.062427961",
+      "FromBaseToUnitFunc": "{x} * 0.062427961",
       "Prefixes": [ "Kilo" ],
       "Localization": [
         {
@@ -201,8 +218,8 @@
         "M": "Slug",
         "L": "Foot"
       },
-      "FromUnitToBaseFunc": "x*515.378818",
-      "FromBaseToUnitFunc": "x*0.00194032033",
+      "FromUnitToBaseFunc": "{x} * 515.378818",
+      "FromBaseToUnitFunc": "{x} * 0.00194032033",
       "Localization": [
         {
           "Culture": "en-US",
@@ -213,8 +230,8 @@
     {
       "SingularName": "PoundPerUSGallon",
       "PluralName": "PoundsPerUSGallon",
-      "FromUnitToBaseFunc": "x*1.19826427e2",
-      "FromBaseToUnitFunc": "x/1.19826427e2",
+      "FromUnitToBaseFunc": "{x} * 1.19826427e2",
+      "FromBaseToUnitFunc": "{x} / 1.19826427e2",
       "Localization": [
         {
           "Culture": "en-US",
@@ -222,11 +239,35 @@
         }
       ]
     },
+	{
+      "SingularName": "OuncePerUSGallon",
+      "PluralName": "OuncesPerUSGallon",
+      "FromUnitToBaseFunc": " {x} / 0.1335264711843",
+      "FromBaseToUnitFunc": "{x} * 0.1335264711843",
+      "Localization": [
+        {
+          "Culture": "en-US",
+          "Abbreviations": [ "oz/gal (U.S.)" ]
+        }
+      ]
+    },
+	{
+      "SingularName": "OuncePerImperialGallon",
+      "PluralName": "OuncesPerImperialGallon",
+      "FromUnitToBaseFunc": " {x} / 0.1603586720609",
+      "FromBaseToUnitFunc": "{x} * 0.1603586720609",
+      "Localization": [
+        {
+          "Culture": "en-US",
+          "Abbreviations": [ "oz/gal (imp.)" ]
+        }
+      ]
+    },
     {
       "SingularName": "PoundPerImperialGallon",
       "PluralName": "PoundsPerImperialGallon",
-      "FromUnitToBaseFunc": "x*9.9776398e1",
-      "FromBaseToUnitFunc": "x/9.9776398e1",
+      "FromUnitToBaseFunc": "{x} * 9.9776398e1",
+      "FromBaseToUnitFunc": "{x} / 9.9776398e1",
       "Localization": [
         {
           "Culture": "en-US",

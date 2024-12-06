@@ -10,19 +10,19 @@ namespace UnitsNet
     /// <summary>
     /// Is the base class for all attributes that are related to <see cref="QuantityTypeConverter{T}"/>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Property)]
     public abstract class UnitAttributeBase : Attribute
     {
         /// <summary>
-        /// The unit enum type, such as <see cref="UnitsNet.Units.LengthUnit" />
+        /// The unit to convert to, such as <see cref="UnitsNet.Units.LengthUnit" />. Defaults to the unit the quantity as constructed with.
         /// </summary>
-        public Enum UnitType { get; set; }
+        public Enum? UnitType { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitAttributeBase"/> class.
         /// </summary>
         /// <param name="unitType"></param>
-        public UnitAttributeBase(object unitType)
+        public UnitAttributeBase(object? unitType)
         {
             UnitType = unitType as Enum;
         }
@@ -37,7 +37,7 @@ namespace UnitsNet
         /// Initializes a new instance of the <see cref="DefaultUnitAttribute"/> class.
         /// </summary>
         /// <param name="unitType">The unit the quantity gets when the string parsing dose only consist of digits</param>
-        public DefaultUnitAttribute(object unitType) : base(unitType) { }
+        public DefaultUnitAttribute(object? unitType) : base(unitType) { }
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ namespace UnitsNet
         /// Initializes a new instance of the <see cref="ConvertToUnitAttribute"/> class.
         /// </summary>
         /// <param name="unitType">The unit the quantity is converted to when parsing from string</param>
-        public ConvertToUnitAttribute(object unitType) : base(unitType) { }
+        public ConvertToUnitAttribute(object? unitType) : base(unitType) { }
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ namespace UnitsNet
     public class DisplayAsUnitAttribute : DefaultUnitAttribute
     {
         /// <summary>
-        /// The formating used when the quantity is converted to string. See <see cref="IQuantity.ToString(System.IFormatProvider)"/>
+        /// The formatting used when the quantity is converted to string. See <see cref="IQuantity.ToString(System.IFormatProvider)"/>
         /// </summary>
         public string Format { get; set; }
 
@@ -66,8 +66,8 @@ namespace UnitsNet
         /// Initializes a new instance of the <see cref="DisplayAsUnitAttribute"/> class.
         /// </summary>
         /// <param name="unitType">The unit the quantity should be displayed in</param>
-        /// <param name="format">Formating string <see cref="IQuantity.ToString(System.IFormatProvider)"/> </param>
-        public DisplayAsUnitAttribute(object unitType, string format = "") : base(unitType)
+        /// <param name="format">Formatting string <see cref="IQuantity.ToString(System.IFormatProvider)"/> </param>
+        public DisplayAsUnitAttribute(object? unitType, string format = "") : base(unitType)
         {
             Format = format;
         }
@@ -76,7 +76,7 @@ namespace UnitsNet
     /// <summary>
     /// <para>
     ///     Converts between IQuantity and string.
-    ///     Implements a TypeConverter for IQuantitys. This allows eg the PropertyGrid to read and write properties of type IQuantity.
+    ///     Implements a TypeConverter for IQuantities. This allows eg the PropertyGrid to read and write properties of type IQuantity.
     /// </para>
     ///   <para>For basic understanding of TypeConverters consult the .NET documentation.</para>
     /// </summary>
@@ -107,7 +107,7 @@ namespace UnitsNet
     ///     Units.Length Length { get; set; }
     /// </code>
     ///
-    /// <code title="Using the TypeConverter with DisplayAsUnit attribute with formating">
+    /// <code title="Using the TypeConverter with DisplayAsUnit attribute with formatting">
     ///     [DisplayAsUnit(UnitsNet.Units.LengthUnit.Meter, "g")]
     ///     [TypeConverter(typeof(UnitsNetTypeConverter{Length}))]
     ///     Units.Length Length { get; set; }
@@ -125,7 +125,7 @@ namespace UnitsNet
     ///     Units.Length Length { get; set; }
     /// </code>
     /// </example>
-    public class QuantityTypeConverter<TQuantity> : TypeConverter where TQuantity : IQuantity
+    public class QuantityTypeConverter<TQuantity> : TypeConverter where TQuantity : struct, IQuantity
     {
         /// <summary>
         ///     Returns true if sourceType if of type <see cref="string"/>
@@ -133,27 +133,25 @@ namespace UnitsNet
         /// <param name="context">An <see cref="System.ComponentModel.ITypeDescriptorContext"/> that provides a format context.</param>
         /// <param name="sourceType">A <see cref="System.Type"/> that represents the type you want to convert from.</param>
         /// <returns>true if this converter can perform the conversion; otherwise, false.</returns>
-        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
         {
             return (sourceType == typeof(string)) || base.CanConvertFrom(context, sourceType);
         }
 
-        private static TAttribute GetAttribute<TAttribute>(ITypeDescriptorContext context) where TAttribute : UnitAttributeBase
+        private static TAttribute? GetAttribute<TAttribute>(ITypeDescriptorContext? context) where TAttribute : UnitAttributeBase
         {
-            TAttribute attribute = null;
-            AttributeCollection ua = context?.PropertyDescriptor.Attributes;
+            if (context?.PropertyDescriptor is null) return null;
 
-            attribute = (TAttribute)ua?[typeof(TAttribute)];
+            var attribute = (TAttribute?)context.PropertyDescriptor.Attributes[typeof(TAttribute)];
 
-            if (attribute != null)
+            // Ensure the attribute's unit is compatible with this converter's quantity.
+            if (attribute?.UnitType != null)
             {
-                QuantityType expected = default(TQuantity).Type;
-                QuantityType actual = QuantityType.Undefined;
-
-                if (attribute.UnitType != null) actual = Quantity.From(1, attribute.UnitType).Type;
-                if (actual != QuantityType.Undefined && expected != actual)
+                string converterQuantityName = default(TQuantity).QuantityInfo.Name;
+                string attributeQuantityName = Quantity.From(1, attribute.UnitType).QuantityInfo.Name;
+                if (converterQuantityName != attributeQuantityName)
                 {
-                    throw new ArgumentException($"The specified UnitType:'{attribute.UnitType}' dose not match QuantityType:'{expected}'");
+                    throw new ArgumentException($"The {attribute.GetType()}'s UnitType [{attribute.UnitType}] is not compatible with the converter's quantity [{converterQuantityName}].");
                 }
             }
 
@@ -169,39 +167,41 @@ namespace UnitsNet
         /// <returns>An <see cref="IQuantity"/> object.</returns>
         /// <exception cref="System.NotSupportedException">The conversion cannot be performed.</exception>
         /// <exception cref="ArgumentException">Unit value is not a know unit enum type.</exception>
-        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+        public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
         {
-            string stringValue = value as string;
-            object result = null;
-
-            if (!string.IsNullOrEmpty(stringValue))
+            if (value is string stringValue && !string.IsNullOrEmpty(stringValue))
             {
+                IQuantity? quantity = null;
+
                 if (double.TryParse(stringValue, NumberStyles.Any, culture, out double dvalue))
                 {
-                    DefaultUnitAttribute defaultUnit = GetAttribute<DefaultUnitAttribute>(context) ?? new DefaultUnitAttribute(default(TQuantity).Unit);
-
-                    result = Quantity.From(dvalue, defaultUnit.UnitType);
+                    var defaultUnit = GetAttribute<DefaultUnitAttribute>(context) ?? new DefaultUnitAttribute(default(TQuantity).Unit);
+                    if(defaultUnit.UnitType != null)
+                        quantity = Quantity.From(dvalue, defaultUnit.UnitType);
                 }
                 else
                 {
-                    result = Quantity.Parse(culture, typeof(TQuantity), stringValue);
+                    quantity = Quantity.Parse(culture, typeof(TQuantity), stringValue);
                 }
 
-                ConvertToUnitAttribute convertToUnit = GetAttribute<ConvertToUnitAttribute>(context);
-                if (convertToUnit != null)
+                if( quantity != null)
                 {
-                    result = ((IQuantity)result).ToUnit(convertToUnit.UnitType);
+                    ConvertToUnitAttribute? convertToUnit = GetAttribute<ConvertToUnitAttribute>(context);
+                    if (convertToUnit != null && convertToUnit.UnitType != null)
+                        quantity = quantity.ToUnit(convertToUnit.UnitType);
+
+                    return quantity;
                 }
             }
 
-            return result ?? base.ConvertFrom(context, culture, value);
+            return base.ConvertFrom(context, culture, value);
         }
 
         /// <summary>Returns true whether this converter can convert the <see cref="IQuantity"/> to string, using the specified context.</summary>
         /// <returns>true if this converter can perform the conversion; otherwise, false.</returns>
         /// <param name="context">An <see cref="T:System.ComponentModel.ITypeDescriptorContext" /> that provides a format context. </param>
         /// <param name="destinationType">A <see cref="T:System.Type" /> that represents the type you want to convert to. </param>
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType)
         {
             return (destinationType == typeof(string)) || base.CanConvertTo(context, destinationType);
         }
@@ -214,29 +214,26 @@ namespace UnitsNet
         /// <param name="destinationType">The <see cref="T:System.Type" /> to convert the <paramref name="value" /> parameter to. </param>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="destinationType" /> parameter is null. </exception>
         /// <exception cref="T:System.NotSupportedException">The conversion cannot be performed. </exception>
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        public override object? ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType)
         {
-            IQuantity qvalue = value as IQuantity;
-            object result = null;
-            DisplayAsUnitAttribute displayAsUnit = GetAttribute<DisplayAsUnitAttribute>(context);
+            DisplayAsUnitAttribute? displayAsUnit = GetAttribute<DisplayAsUnitAttribute>(context);
 
-            if (destinationType == typeof(string) && qvalue != null && displayAsUnit != null)
+            if (value is not IQuantity qvalue || destinationType != typeof(string))
             {
-                if (displayAsUnit.UnitType != null)
-                {
-                    result = qvalue.ToUnit(displayAsUnit.UnitType).ToString(displayAsUnit.Format, culture);
-                }
-                else
-                {
-                    result = qvalue.ToString(displayAsUnit.Format, culture);
-                }
-            }
-            else
-            {
-                result = base.ConvertTo(context, culture, value, destinationType);
+                return base.ConvertTo(context, culture, value, destinationType);
             }
 
-            return result;
+            if (displayAsUnit == null)
+            {
+                return qvalue.ToString(culture);
+            }
+
+            if (displayAsUnit.UnitType == null)
+            {
+                return qvalue.ToString(displayAsUnit.Format, culture);
+            }
+
+            return qvalue.ToUnit(displayAsUnit.UnitType).ToString(displayAsUnit.Format, culture);
         }
     }
 }

@@ -7,66 +7,81 @@ namespace UnitsNet.Benchmark
     [MemoryDiagnoser]
     public class UnitsNetBenchmarks
     {
-        private Length length = Length.FromMeters(3.0);
-        private IQuantity lengthIQuantity = Length.FromMeters(3.0);
+        private readonly Length _length = Length.FromMeters(3.0);
+        private readonly IQuantity _lengthIQuantity = Length.FromMeters(3.0);
 
         [Benchmark]
+        [BenchmarkCategory("Construction")]
         public Length Constructor() => new Length(3.0, LengthUnit.Meter);
 
         [Benchmark]
+        [BenchmarkCategory("Construction")]
         public Length Constructor_SI() => new Length(3.0, UnitSystem.SI);
 
         [Benchmark]
+        [BenchmarkCategory("Construction")]
         public Length FromMethod() => Length.FromMeters(3.0);
 
         [Benchmark]
-        public double ToProperty() => length.Centimeters;
+        [BenchmarkCategory("Transformation")]
+        public double ToProperty() => _length.Centimeters;
 
         [Benchmark]
-        public double As() => length.As(LengthUnit.Centimeter);
+        [BenchmarkCategory("Transformation, Value")]
+        public double As() => _length.As(LengthUnit.Centimeter);
 
         [Benchmark]
-        public double As_SI() => length.As(UnitSystem.SI);
+        [BenchmarkCategory("Transformation, Value")]
+        public double As_SI() => _length.As(UnitSystem.SI);
 
         [Benchmark]
-        public Length ToUnit() => length.ToUnit(LengthUnit.Centimeter);
+        [BenchmarkCategory("Transformation, Quantity")]
+        public Length ToUnit() => _length.ToUnit(LengthUnit.Centimeter);
 
         [Benchmark]
-        public Length ToUnit_SI() => length.ToUnit(UnitSystem.SI);
+        [BenchmarkCategory("Transformation, Quantity")]
+        public Length ToUnit_SI() => _length.ToUnit(UnitSystem.SI);
 
         [Benchmark]
-        public string ToStringTest() => length.ToString();
+        [BenchmarkCategory("ToString")]
+        public string ToStringTest() => _length.ToString();
 
         [Benchmark]
+        [BenchmarkCategory("Parsing")]
         public Length Parse() => Length.Parse("3.0 m");
 
         [Benchmark]
-        public bool TryParseValid() => Length.TryParse("3.0 m", out var l);
+        [BenchmarkCategory("Parsing")]
+        public bool TryParseValid() => Length.TryParse("3.0 m", out _);
 
         [Benchmark]
-        public bool TryParseInvalid() => Length.TryParse("3.0 zoom", out var l);
+        [BenchmarkCategory("Parsing")]
+        public bool TryParseInvalid() => Length.TryParse("3.0 zoom", out _);
 
         [Benchmark]
+        [BenchmarkCategory("Construction")]
         public IQuantity QuantityFrom() => Quantity.From(3.0, LengthUnit.Meter);
 
         [Benchmark]
-        public double IQuantity_As() => lengthIQuantity.As(LengthUnit.Centimeter);
+        [BenchmarkCategory("Transformation, Value")]
+        public double IQuantity_As() => _lengthIQuantity.As(LengthUnit.Centimeter);
 
         [Benchmark]
-        public double IQuantity_As_SI() => lengthIQuantity.As(UnitSystem.SI);
+        [BenchmarkCategory("Transformation, Value")]
+        public double IQuantity_As_SI() => _lengthIQuantity.As(UnitSystem.SI);
 
         [Benchmark]
-        public IQuantity IQuantity_ToUnit() => lengthIQuantity.ToUnit(LengthUnit.Centimeter);
+        [BenchmarkCategory("Transformation, Quantity")]
+        public IQuantity IQuantity_ToUnit() => _lengthIQuantity.ToUnit(LengthUnit.Centimeter);
 
         [Benchmark]
-        public string IQuantity_ToStringTest() => lengthIQuantity.ToString();
+        [BenchmarkCategory("ToString")]
+        public string IQuantity_ToStringTest() => _lengthIQuantity.ToString();
     }
 
     class Program
     {
         static void Main(string[] args)
-        {
-            var summary = BenchmarkRunner.Run<UnitsNetBenchmarks>();
-        }
+            => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
     }
 }

@@ -1,11 +1,11 @@
-// Licensed under MIT No Attribution, see LICENSE file at the root.
+﻿// Licensed under MIT No Attribution, see LICENSE file at the root.
 // Copyright 2013 Andreas Gullberg Larsen (andreas.larsen84@gmail.com). Maintained at https://github.com/angularsen/UnitsNet.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+using CodeGen.Exceptions;
 using CodeGen.Helpers;
 using CodeGen.JsonTypes;
 using Newtonsoft.Json;
@@ -15,7 +15,7 @@ namespace CodeGen.Generators
     /// <summary>
     ///     Parses JSON files that define quantities and their units.
     ///     This will later be used to generate source code and can be reused for different targets such as .NET framework,
-    ///     WindowsRuntimeComponent and even other programming languages.
+    ///     .NET Core, .NET nanoFramework and even other programming languages.
     /// </summary>
     internal static class QuantityJsonFilesParser
     {
@@ -33,15 +33,20 @@ namespace CodeGen.Generators
         public static Quantity[] ParseQuantities(string rootDir)
         {
             var jsonDir = Path.Combine(rootDir, "Common/UnitDefinitions");
-            var jsonFiles = Directory.GetFiles(jsonDir, "*.json");
-            return jsonFiles.Select(ParseQuantityFile).ToArray();
+            var jsonFileNames = Directory.GetFiles(jsonDir, "*.json");
+            return jsonFileNames
+                .OrderBy(fn => fn, StringComparer.InvariantCultureIgnoreCase)
+                .Select(ParseQuantityFile)
+                .ToArray();
         }
 
-        private static Quantity ParseQuantityFile(string jsonFile)
+        private static Quantity ParseQuantityFile(string jsonFileName)
         {
             try
             {
-                var quantity = JsonConvert.DeserializeObject<Quantity>(File.ReadAllText(jsonFile, Encoding.UTF8), JsonSerializerSettings);
+                var quantity = JsonConvert.DeserializeObject<Quantity>(File.ReadAllText(jsonFileName), JsonSerializerSettings)
+                               ?? throw new UnitsNetCodeGenException($"Unable to parse quantity from JSON file: {jsonFileName}");
+
                 AddPrefixUnits(quantity);
                 FixConversionFunctionsForDecimalValueTypes(quantity);
                 OrderUnitsByName(quantity);
@@ -49,21 +54,21 @@ namespace CodeGen.Generators
             }
             catch (Exception e)
             {
-                throw new Exception($"Error parsing quantity JSON file: {jsonFile}", e);
+                throw new Exception($"Error parsing quantity JSON file: {jsonFileName}", e);
             }
         }
 
         private static void OrderUnitsByName(Quantity quantity)
         {
-            quantity.Units = quantity.Units.OrderBy(u => u.SingularName).ToArray();
+            quantity.Units = quantity.Units.OrderBy(u => u.SingularName, StringComparer.OrdinalIgnoreCase).ToArray();
         }
 
         private static void FixConversionFunctionsForDecimalValueTypes(Quantity quantity)
         {
-            foreach (var u in quantity.Units)
+            foreach (Unit u in quantity.Units)
                 // Use decimal for internal calculations if base type is not double, such as for long or int.
             {
-                if (string.Equals(quantity.BaseType, "decimal", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(quantity.ValueType, "decimal", StringComparison.OrdinalIgnoreCase))
                 {
                     // Change any double literals like "1024d" to decimal literals "1024m"
                     u.FromUnitToBaseFunc = u.FromUnitToBaseFunc.Replace("d", "m");
@@ -75,8 +80,8 @@ namespace CodeGen.Generators
         private static void AddPrefixUnits(Quantity quantity)
         {
             var unitsToAdd = new List<Unit>();
-            foreach (var unit in quantity.Units)
-            foreach (var prefix in unit.Prefixes)
+            foreach (Unit unit in quantity.Units)
+            foreach (Prefix prefix in unit.Prefixes)
             {
                 try
                 {
@@ -89,8 +94,11 @@ namespace CodeGen.Generators
                         BaseUnits = null, // Can we determine this somehow?
                         FromBaseToUnitFunc = $"({unit.FromBaseToUnitFunc}) / {prefixInfo.Factor}",
                         FromUnitToBaseFunc = $"({unit.FromUnitToBaseFunc}) * {prefixInfo.Factor}",
-                        Localization = GetLocalizationForPrefixUnit(unit.Localization, prefixInfo)
-                    });
+                        Localization = GetLocalizationForPrefixUnit(unit.Localization, prefixInfo),
+                        ObsoleteText = unit.ObsoleteText,
+                        SkipConversionGeneration = unit.SkipConversionGeneration,
+                        AllowAbbreviationLookup = unit.AllowAbbreviationLookup
+                    } );
                 }
                 catch (Exception e)
                 {
@@ -110,7 +118,7 @@ namespace CodeGen.Generators
         {
             return localizations.Select(loc =>
             {
-                if (loc.TryGetAbbreviationsForPrefix(prefixInfo.Prefix, out string[] unitAbbreviationsForPrefix))
+                if (loc.TryGetAbbreviationsForPrefix(prefixInfo.Prefix, out string[]? unitAbbreviationsForPrefix))
                 {
                     return new Localization
                     {

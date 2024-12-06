@@ -18,15 +18,24 @@
 // Copyright 2013 Andreas Gullberg Larsen (andreas.larsen84@gmail.com). Maintained at https://github.com/angularsen/UnitsNet.
 
 using System;
+using UnitsNet.Units;
+using Xunit;
 
 namespace UnitsNet.Tests.CustomCode
 {
     public class FuelEfficiencyTests : FuelEfficiencyTestsBase
     {
-        // Override properties in base class here
+        protected override bool SupportsSIUnitSystem => false;
         protected override double KilometersPerLitersInOneLiterPer100Kilometers => 100;
         protected override double LitersPer100KilometersInOneLiterPer100Kilometers => 1;
         protected override double MilesPerUkGallonInOneLiterPer100Kilometers => 282.4809363;
         protected override double MilesPerUsGallonInOneLiterPer100Kilometers => 235.2145833;
+        
+        [Theory(Skip = "Conversion from 0 km/L results in infinity")]
+        [MemberData(nameof(UnitTypes))]
+        public override void ToUnit_FromDefaultQuantity_ReturnsQuantityWithGivenUnit(FuelEfficiencyUnit unit)
+        {
+            base.ToUnit_FromDefaultQuantity_ReturnsQuantityWithGivenUnit(unit);
+        }
     }
 }

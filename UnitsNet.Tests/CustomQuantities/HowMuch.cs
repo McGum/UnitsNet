@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace UnitsNet.Tests.CustomQuantities
 {
@@ -6,30 +6,35 @@ namespace UnitsNet.Tests.CustomQuantities
     /// <summary>
     /// Example of a custom/third-party quantity implementation, for plugging in quantities and units at runtime.
     /// </summary>
-    public struct HowMuch : IQuantity
+    public readonly struct HowMuch : IQuantity
     {
-        public HowMuch(double value, Enum unit) : this()
+        public HowMuch(double value, HowMuchUnit unit)
         {
             Unit = unit;
             Value = value;
         }
 
-        public Enum Unit { get; }
-        public double Value { get; }
+        public bool Equals(IQuantity? other, IQuantity tolerance) => throw new NotImplementedException();
 
-        #region Crud to satisfy IQuantity, but not really used for anything
+        Enum IQuantity.Unit => Unit;
+        public HowMuchUnit Unit { get; }
+
+        public QuantityValue Value { get; }
+
+        #region IQuantity
 
         private static readonly HowMuch Zero = new HowMuch(0, HowMuchUnit.Some);
 
-        public QuantityType Type => QuantityType.Undefined;
         public BaseDimensions Dimensions => BaseDimensions.Dimensionless;
 
-        public QuantityInfo QuantityInfo => new QuantityInfo(Type,
+        public QuantityInfo QuantityInfo => new(
+            nameof(HowMuch),
+            typeof(HowMuchUnit),
             new UnitInfo[]
             {
-                new UnitInfo<HowMuchUnit>(HowMuchUnit.Some, BaseUnits.Undefined),
-                new UnitInfo<HowMuchUnit>(HowMuchUnit.ATon, BaseUnits.Undefined),
-                new UnitInfo<HowMuchUnit>(HowMuchUnit.AShitTon, BaseUnits.Undefined),
+                new UnitInfo<HowMuchUnit>(HowMuchUnit.Some, "Some", BaseUnits.Undefined, nameof(HowMuch)),
+                new UnitInfo<HowMuchUnit>(HowMuchUnit.ATon, "Tons", BaseUnits.Undefined, nameof(HowMuch)),
+                new UnitInfo<HowMuchUnit>(HowMuchUnit.AShitTon, "ShitTons", BaseUnits.Undefined, nameof(HowMuch)),
             },
             HowMuchUnit.Some,
             Zero,
@@ -39,14 +44,17 @@ namespace UnitsNet.Tests.CustomQuantities
 
         public double As(UnitSystem unitSystem) => throw new NotImplementedException();
 
-        public IQuantity ToUnit(Enum unit) => new HowMuch(As(unit), unit);
+        public IQuantity ToUnit(Enum unit)
+        {
+            if (unit is HowMuchUnit howMuchUnit) return new HowMuch(As(unit), howMuchUnit);
+            throw new ArgumentException("Must be of type HowMuchUnit.", nameof(unit));
+        }
 
         public IQuantity ToUnit(UnitSystem unitSystem) => throw new NotImplementedException();
 
-        public string ToString(string format, IFormatProvider formatProvider) => $"HowMuch ({format}, {formatProvider})";
-        public string ToString(IFormatProvider provider) => $"HowMuch ({provider})";
-        public string ToString(IFormatProvider provider, int significantDigitsAfterRadix) => $"HowMuch ({provider}, {significantDigitsAfterRadix})";
-        public string ToString(IFormatProvider provider, string format, params object[] args) => $"HowMuch ({provider}, {string.Join(", ", args)})";
+        public override string ToString() => $"{Value} {Unit}";
+        public string ToString(string? format, IFormatProvider? formatProvider) => $"HowMuch ({format}, {formatProvider})";
+        public string ToString(IFormatProvider? provider) => $"HowMuch ({provider})";
 
         #endregion
     }

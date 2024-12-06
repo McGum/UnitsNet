@@ -28,28 +28,37 @@ namespace UnitsNet.Tests.CustomCode
 {
     public class MassConcentrationTests : MassConcentrationTestsBase
     {
+        protected override bool SupportsSIUnitSystem => false;
+
         #region Unit Conversion Coefficients
         protected override double PicogramsPerLiterInOneKilogramPerCubicMeter => 1e12;
+        protected override double PicogramsPerMicroliterInOneKilogramPerCubicMeter => 1e6;
         protected override double PicogramsPerDeciliterInOneKilogramPerCubicMeter => 1e11;
         protected override double NanogramsPerLiterInOneKilogramPerCubicMeter => 1e9;
+        protected override double NanogramsPerMicroliterInOneKilogramPerCubicMeter => 1e3;
         protected override double PicogramsPerMilliliterInOneKilogramPerCubicMeter => 1e9;
         protected override double MicrogramsPerCubicMeterInOneKilogramPerCubicMeter => 1e9;
         protected override double NanogramsPerDeciliterInOneKilogramPerCubicMeter => 1e8;
         protected override double NanogramsPerMilliliterInOneKilogramPerCubicMeter => 1e6;
         protected override double MicrogramsPerLiterInOneKilogramPerCubicMeter => 1e6;
+        protected override double MicrogramsPerMicroliterInOneKilogramPerCubicMeter => 1;
         protected override double MilligramsPerCubicMeterInOneKilogramPerCubicMeter => 1e6;
         protected override double MicrogramsPerDeciliterInOneKilogramPerCubicMeter => 1e5;
         protected override double MicrogramsPerMilliliterInOneKilogramPerCubicMeter => 1e3;
         protected override double GramsPerCubicMeterInOneKilogramPerCubicMeter => 1e3;
         protected override double MilligramsPerLiterInOneKilogramPerCubicMeter => 1e3;
+        protected override double MilligramsPerMicroliterInOneKilogramPerCubicMeter => 1e-3;
         protected override double CentigramsPerLiterInOneKilogramPerCubicMeter => 1e2;
+        protected override double CentigramsPerMicroliterInOneKilogramPerCubicMeter => 1e-4;
         protected override double MilligramsPerDeciliterInOneKilogramPerCubicMeter => 1e2;
         protected override double MilligramsPerMilliliterInOneKilogramPerCubicMeter => 1;
         protected override double GramsPerLiterInOneKilogramPerCubicMeter => 1;
+        protected override double GramsPerMicroliterInOneKilogramPerCubicMeter => 1e-6;
         protected override double KilogramsPerCubicMeterInOneKilogramPerCubicMeter => 1;
         protected override double CentigramsPerDeciliterInOneKilogramPerCubicMeter => 1e1;
         protected override double DecigramsPerDeciliterInOneKilogramPerCubicMeter => 1;
         protected override double DecigramsPerLiterInOneKilogramPerCubicMeter => 1e1;
+        protected override double DecigramsPerMicroliterInOneKilogramPerCubicMeter => 1e-5;
         protected override double CentigramsPerMilliliterInOneKilogramPerCubicMeter => 1e-1;
         protected override double GramsPerDeciliterInOneKilogramPerCubicMeter => 1e-1;
         protected override double DecigramsPerMilliliterInOneKilogramPerCubicMeter => 1e-2;
@@ -70,12 +79,16 @@ namespace UnitsNet.Tests.CustomCode
         protected override double PoundsPerCubicInchInOneKilogramPerCubicMeter => 3.61272923e-5;
         protected override double PoundsPerUSGallonInOneKilogramPerCubicMeter => 8.3454045e-3;
         protected override double SlugsPerCubicFootInOneKilogramPerCubicMeter => 0.00194032;
+
+        protected override double OuncesPerImperialGallonInOneKilogramPerCubicMeter => 0.1603586720609;
+
+        protected override double OuncesPerUSGallonInOneKilogramPerCubicMeter => 0.1335264711843;
         #endregion
 
         [Theory]
         [InlineData(60.02, MassConcentrationUnit.KilogramPerCubicMeter,
                     58.443, MolarMassUnit.GramPerMole,
-                    1026.98355, MolarityUnit.MolesPerCubicMeter)]    // test from JonathanDavies626
+                    1026.98355, MolarityUnit.MolePerCubicMeter)]    // test from JonathanDavies626
         public void MolarityFromMassConcentrationAndMolarMass(
             double massConcValue, MassConcentrationUnit massConcUnit,
             double molarMassValue, MolarMassUnit molarMassUnit,
@@ -119,10 +132,9 @@ namespace UnitsNet.Tests.CustomCode
             var volume = new Volume(volumeValue, volumeUnit);
 
             Mass massComponent = massConcentration * volume;
-            
+
             AssertEx.EqualTolerance(expectedMassValue, massComponent.As(expectedMassUnit), tolerance);
         }
-
 
         [Fact(Skip = "No BaseUnit defined: see https://github.com/angularsen/UnitsNet/issues/651")]
         public void DefaultSIUnitIsKgPerCubicMeter()

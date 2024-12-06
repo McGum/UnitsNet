@@ -21,27 +21,33 @@
 // Copyright 2013 Andreas Gullberg Larsen (andreas.larsen84@gmail.com). Maintained at https://github.com/angularsen/UnitsNet.
 
 
-using Xunit;
-using System;
 using UnitsNet.Units;
+using Xunit;
 
 namespace UnitsNet.Tests.CustomCode
 {
     public class MolarityTests : MolarityTestsBase
     {
+        protected override bool SupportsSIUnitSystem => true;
+
         #region Unit Conversion Coefficients
-        protected override double CentimolesPerLiterInOneMolesPerCubicMeter => 1e-1;
-        protected override double DecimolesPerLiterInOneMolesPerCubicMeter => 1e-2;
-        protected override double MolesPerLiterInOneMolesPerCubicMeter => 1e-3;
-        protected override double MillimolesPerLiterInOneMolesPerCubicMeter => 1;
-        protected override double MolesPerCubicMeterInOneMolesPerCubicMeter => 1;
-        protected override double MicromolesPerLiterInOneMolesPerCubicMeter => 1e3;
-        protected override double NanomolesPerLiterInOneMolesPerCubicMeter => 1e6;
-        protected override double PicomolesPerLiterInOneMolesPerCubicMeter => 1e9;
+
+        protected override double CentimolesPerLiterInOneMolePerCubicMeter => 1e-1;
+        protected override double DecimolesPerLiterInOneMolePerCubicMeter => 1e-2;
+        protected override double FemtomolesPerLiterInOneMolePerCubicMeter => 1e12;
+        protected override double MolesPerLiterInOneMolePerCubicMeter => 1e-3;
+        protected override double MillimolesPerLiterInOneMolePerCubicMeter => 1;
+        protected override double MolesPerCubicMeterInOneMolePerCubicMeter => 1;
+        protected override double MicromolesPerLiterInOneMolePerCubicMeter => 1e3;
+        protected override double NanomolesPerLiterInOneMolePerCubicMeter => 1e6;
+        protected override double PicomolesPerLiterInOneMolePerCubicMeter => 1e9;
+        protected override double KilomolesPerCubicMeterInOneMolePerCubicMeter => 1e-3;
+        protected override double PoundMolesPerCubicFootInOneMolePerCubicMeter => 6.242796e-5;
+
         #endregion
-        
+
         [Theory]
-        [InlineData(0.5, MolarityUnit.MolesPerLiter,
+        [InlineData(0.5, MolarityUnit.MolePerLiter,
                     KnownQuantities.DensityOfEthanolInKgPerCubicMeter, DensityUnit.KilogramPerCubicMeter,
                     KnownQuantities.MolarMassOfEthanolInGramsPerMole, MolarMassUnit.GramPerMole,
                     29.19419518377693, VolumeConcentrationUnit.MillilitersPerLiter)]    // 0.5M ethanol
@@ -61,10 +67,10 @@ namespace UnitsNet.Tests.CustomCode
         }
 
         [Theory]
-        [InlineData(1.02698355, MolarityUnit.MolesPerLiter,
+        [InlineData(1.02698355, MolarityUnit.MolePerLiter,
                     58.443, MolarMassUnit.GramPerMole,
                     60.02, MassConcentrationUnit.KilogramPerCubicMeter)]    // test from JonathanDavies626
-        [InlineData(0.1142805, MolarityUnit.MolesPerLiter,
+        [InlineData(0.1142805, MolarityUnit.MolePerLiter,
                     KnownQuantities.MolarMassHClInGramsPerMole, MolarMassUnit.GramPerMole,
                     4.16667, MassConcentrationUnit.KilogramPerCubicMeter)]    // HCL solution
         public void ExpectMolarityConvertedToMassConcentrationCorrectly(
@@ -81,9 +87,9 @@ namespace UnitsNet.Tests.CustomCode
         }
 
         [Theory]
-        [InlineData(0.1142805, MolarityUnit.MolesPerLiter,
+        [InlineData(0.1142805, MolarityUnit.MolePerLiter,
                     10, VolumeConcentrationUnit.Percent,
-                    0.01142805, MolarityUnit.MolesPerLiter)]    // 10 % dilution of HCL
+                    0.01142805, MolarityUnit.MolePerLiter)]    // 10 % dilution of HCL
         public void MolarityFromDilutedSolution(
             double startingMolarityValue, MolarityUnit startingMolarityUnit,
             double newConcentration, VolumeConcentrationUnit newConcentrationUnit,
@@ -108,7 +114,5 @@ namespace UnitsNet.Tests.CustomCode
         {
             Assert.Equal(1, Molarity.Parse("1000 mM").MolesPerLiter);
         }
-
     }
-
 }

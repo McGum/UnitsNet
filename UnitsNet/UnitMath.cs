@@ -9,6 +9,17 @@ namespace UnitsNet
     /// </summary>
     public static class UnitMath
     {
+        /// <summary>Returns the absolute value of a <typeparamref name="TQuantity" />.</summary>
+        /// <param name="value">
+        ///     A quantity with a value that is greater than or equal to <see cref="F:System.Double.MinValue" />,
+        ///     but less than or equal to <see cref="F:System.Double.MaxValue" />.
+        /// </param>
+        /// <returns>A quantity with a value, such that 0 ≤ value ≤ <see cref="F:System.Double.MaxValue" />.</returns>
+        public static TQuantity Abs<TQuantity>(this TQuantity value) where TQuantity : IQuantity
+        {
+            return value.Value >= QuantityValue.Zero ? value : (TQuantity) Quantity.From(-value.Value, value.Unit);
+        }
+
         /// <summary>Computes the sum of a sequence of <typeparamref name="TQuantity" /> values.</summary>
         /// <param name="source">A sequence of <typeparamref name="TQuantity" /> values to calculate the sum of.</param>
         /// <param name="unitType">The desired unit type for the resulting quantity</param>
@@ -45,6 +56,16 @@ namespace UnitsNet
             where TQuantity : IQuantity
         {
             return source.Select(selector).Sum(unitType);
+        }
+
+        /// <summary>Returns the smaller of two <typeparamref name="TQuantity" /> values.</summary>
+        /// <typeparam name="TQuantity">The type of quantities to compare.</typeparam>
+        /// <param name="val1">The first of two <typeparamref name="TQuantity" /> values to compare.</param>
+        /// <param name="val2">The second of two <typeparamref name="TQuantity" /> values to compare.</param>
+        /// <returns>Parameter <paramref name="val1" /> or <paramref name="val2" />, whichever is smaller.</returns>
+        public static TQuantity Min<TQuantity>(TQuantity val1, TQuantity val2) where TQuantity : IComparable, IQuantity
+        {
+            return val1.CompareTo(val2) == 1 ? val2 : val1;
         }
 
         /// <summary>Computes the min of a sequence of <typeparamref name="TQuantity" /> values.</summary>
@@ -85,6 +106,16 @@ namespace UnitsNet
             where TQuantity : IQuantity
         {
             return source.Select(selector).Min(unitType);
+        }
+
+        /// <summary>Returns the larger of two <typeparamref name="TQuantity" /> values.</summary>
+        /// <typeparam name="TQuantity">The type of quantities to compare.</typeparam>
+        /// <param name="val1">The first of two <typeparamref name="TQuantity" /> values to compare.</param>
+        /// <param name="val2">The second of two <typeparamref name="TQuantity" /> values to compare.</param>
+        /// <returns>Parameter <paramref name="val1" /> or <paramref name="val2" />, whichever is larger.</returns>
+        public static TQuantity Max<TQuantity>(TQuantity val1, TQuantity val2) where TQuantity : IComparable, IQuantity
+        {
+            return val1.CompareTo(val2) == -1 ? val2 : val1;
         }
 
         /// <summary>Computes the max of a sequence of <typeparamref name="TQuantity" /> values.</summary>
@@ -165,6 +196,67 @@ namespace UnitsNet
             where TQuantity : IQuantity
         {
             return source.Select(selector).Average(unitType);
+        }
+
+        /// <summary>Returns <paramref name="value" /> clamped to the inclusive range of <paramref name="min" /> and <paramref name="max" />.</summary>
+        /// <param name="value">The value to be clamped.</param>
+        /// <param name="min">The lower bound of the result.</param>
+        /// <param name="max">The upper bound of the result.</param>
+        /// <returns>
+        ///   <paramref name="value" /> if <paramref name="min" /> ≤ <paramref name="value" /> ≤ <paramref name="max" />.
+        ///
+        ///   -or-
+        ///
+        ///   <paramref name="min" /> (converted to value.Unit) if <paramref name="value" /> &lt; <paramref name="min" />.
+        ///
+        ///   -or-
+        ///
+        ///   <paramref name="max" /> (converted to value.Unit) if <paramref name="max" /> &lt; <paramref name="value" />.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="min" /> cannot be greater than <paramref name="max" />.
+        /// </exception>
+        public static TQuantity Clamp<TQuantity>(TQuantity value, TQuantity min, TQuantity max) where TQuantity : IComparable, IQuantity
+        {
+            var minValue = (TQuantity)min.ToUnit(value.Unit);
+            var maxValue = (TQuantity)max.ToUnit(value.Unit);
+            
+            if (minValue.CompareTo(maxValue) > 0)
+            {
+                throw new ArgumentException($"min ({min}) cannot be greater than max ({max})", nameof(min));
+            }
+
+            if (value.CompareTo(minValue) < 0)
+            {
+                return minValue;
+            }
+
+            if (value.CompareTo(maxValue) > 0)
+            {
+                return maxValue;
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// Explicitly create a <see cref="QuantityValue"/> instance from a double
+        /// </summary>
+        /// <param name="value">The input value</param>
+        /// <returns>An instance of <see cref="QuantityValue"/></returns>
+        public static QuantityValue ToQuantityValue(this double value)
+        {
+            return value; // Implicit cast
+        }
+
+        /// <summary>
+        /// Explicitly create a <see cref="QuantityValue"/> instance from a decimal
+        /// </summary>
+        /// <param name="value">The input value</param>
+        /// <returns>An instance of <see cref="QuantityValue"/></returns>
+        public static QuantityValue ToQuantityValue(this decimal value)
+        {
+            return value; // Implicit cast
         }
     }
 }

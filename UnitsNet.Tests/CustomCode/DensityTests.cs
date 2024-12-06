@@ -3,10 +3,12 @@
 
 using Xunit;
 
-namespace UnitsNet.Tests.CustomCode
+namespace UnitsNet.Tests
 {
     public class DensityTests : DensityTestsBase
     {
+        protected override bool SupportsSIUnitSystem => false;
+
         protected override double MilligramsPerCubicMeterInOneKilogramPerCubicMeter => 1e6;
 
         protected override double GramsPerCubicCentimeterInOneKilogramPerCubicMeter => 1e-3;
@@ -21,9 +23,13 @@ namespace UnitsNet.Tests.CustomCode
 
         protected override double KilogramsPerCubicMillimeterInOneKilogramPerCubicMeter => 1e-9;
 
+        protected override double KilopoundsPerCubicYardInOneKilogramPerCubicMeter => 1.6855549356e-3;
+
         protected override double KilopoundsPerCubicFootInOneKilogramPerCubicMeter => 6.242796e-5;
 
         protected override double KilopoundsPerCubicInchInOneKilogramPerCubicMeter => 3.6127292e-8;
+
+        protected override double PoundsPerCubicYardInOneKilogramPerCubicMeter => 1.6855549356;
 
         protected override double PoundsPerCubicFootInOneKilogramPerCubicMeter => 6.242796e-2;
 
@@ -79,13 +85,41 @@ namespace UnitsNet.Tests.CustomCode
 
         protected override double PicogramsPerDeciLiterInOneKilogramPerCubicMeter => 1e11;
 
+        protected override double FemtogramsPerDeciLiterInOneKilogramPerCubicMeter => 1e14;
+
         protected override double PicogramsPerLiterInOneKilogramPerCubicMeter => 1e12;
 
+        protected override double FemtogramsPerLiterInOneKilogramPerCubicMeter => 1e15;
+
         protected override double PicogramsPerMilliliterInOneKilogramPerCubicMeter => 1e9;
+
+        protected override double FemtogramsPerMilliliterInOneKilogramPerCubicMeter => 1e12;
 
         protected override double MicrogramsPerCubicMeterInOneKilogramPerCubicMeter => 1e9;
 
         protected override double KilogramsPerLiterInOneKilogramPerCubicMeter => 1e-3;
+
+        protected override double TonnesPerCubicFootInOneKilogramPerCubicMeter => 2.8316846591999996e-05;
+
+        protected override double TonnesPerCubicInchInOneKilogramPerCubicMeter => 1.6387063999999997e-08;
+
+        protected override double GramsPerCubicFootInOneKilogramPerCubicMeter => 28.316846591999994;
+
+        protected override double GramsPerCubicInchInOneKilogramPerCubicMeter => 0.016387063999999996;
+
+        protected override double PoundsPerCubicMeterInOneKilogramPerCubicMeter => 2.204622621848775;
+
+        protected override double PoundsPerCubicCentimeterInOneKilogramPerCubicMeter => 2.204622621848775e-6;
+
+        protected override double PoundsPerCubicMillimeterInOneKilogramPerCubicMeter => 2.204622621848775e-9;
+
+        protected override double SlugsPerCubicMeterInOneKilogramPerCubicMeter => 0.068521765561961;
+
+        protected override double SlugsPerCubicCentimeterInOneKilogramPerCubicMeter => 6.8521765561961e-8;
+
+        protected override double SlugsPerCubicMillimeterInOneKilogramPerCubicMeter => 6.8521765561961e-11;
+
+        protected override double SlugsPerCubicInchInOneKilogramPerCubicMeter => 1.1228705576569e-6;
 
         [Fact]
         public static void DensityTimesVolumeEqualsMass()
@@ -107,7 +141,7 @@ namespace UnitsNet.Tests.CustomCode
             DynamicViscosity dynamicViscosity = Density.FromKilogramsPerCubicMeter(2) * KinematicViscosity.FromSquareMetersPerSecond(10);
             Assert.Equal(dynamicViscosity, DynamicViscosity.FromNewtonSecondsPerMeterSquared(20));
         }
-        
+
         [Fact]
         public void DensityTimesSpeedEqualsMassFlux()
         {
@@ -120,6 +154,13 @@ namespace UnitsNet.Tests.CustomCode
         {
             SpecificWeight specificWeight = Density.FromKilogramsPerCubicMeter(10) * Acceleration.FromMetersPerSecondSquared(2);
             Assert.Equal(SpecificWeight.FromNewtonsPerCubicMeter(20), specificWeight);
+        }
+
+        [Fact]
+        public void DensityTimesAreaEqualsLinearDensity()
+        {
+            LinearDensity linearDensity = Density.FromGramsPerCubicCentimeter(10) * Area.FromSquareCentimeters(2);
+            Assert.Equal(20, linearDensity.GramsPerCentimeter);
         }
     }
 }
